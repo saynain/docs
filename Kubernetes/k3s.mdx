@@ -1,0 +1,92 @@
+---
+title: "K3S"
+description: "Here’s a step-by-step guide to install a k3s Kubernetes cluster on 5 ubuntu VMs running in Proxmox."
+tags: kubernetes, k3s
+---
+
+## Step 1: Install k3s server on the master node
+
+- SSH into your chosen master VM.
+- Run the following command to install k3s:
+
+  ```
+  curl -sfL https://get.k3s.io | sh -
+  ```
+- Check the server status:
+
+  ```
+  sudo systemctl status k3s
+  ```
+- Verify if kubectl is working:
+
+  ```
+  sudo k3s kubectl get nodes
+  ```
+
+## Step 2: Get the k3s join token and master IP
+
+You will need the token and master IP to join the agent nodes.
+
+- Get the token from the master
+
+  ```
+  sudo cat /var/lib/rancher/k3s/server/node-token
+  ```
+- Note the master node IP address (e.g., ⁠192.168.x.x).
+
+## Step 3: Install k3s agents on the other 4 nodes
+
+On each worker VM:
+
+- SSH into the worker VM.
+- Run the following command, replacing ⁠`<MASTER_IP>` and ⁠`<NODE_TOKEN>` with values from Step 2:
+
+  ```
+  curl -sfL https://get.k3s.io | K3S_URL=https://<MASTER_IP>:6443 K3S_TOKEN=<NODE_TOKEN> sh -
+  ```
+- Check the agent status:
+
+  ```
+  sudo systemctl status k3s-agent
+  ```
+
+## Step 4: Verify the cluster
+
+Back on the master node, run:
+
+```
+sudo kubectl get nodes
+```
+
+```
+NAME          STATUS   ROLES                  AGE   VERSION
+test-k3s-01   Ready    control-plane,master   33h   v1.32.3+k3s1
+test-k3s-02   Ready    <none>                 33h   v1.32.3+k3s1
+test-k3s-03   Ready    <none>                 32h   v1.32.3+k3s1
+test-k3s-04   Ready    <none>                 32h   v1.32.3+k3s1
+test-k3s-05   Ready    <none>                 32h   v1.32.3+k3s1
+```
+
+## Step 5: Deploy a test workload
+
+Try deploying a simple nginx pod:
+
+```
+sudo kubectl create deployment nginx --image=nginx
+sudo kubectl expose deployment nginx --port=80 --type=NodePort
+sudo kubectl get pods
+sudo kubectl get svc
+```
+
+Access the nginx service via the NodePort on any node IP.
+
+```
+kubectl get svc nginx
+```
+
+```
+NAME    TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+nginx   NodePort   10.43.20.162   <none>        80:32095/TCP   2d19h
+```
+
+![image.png](/images/image.png)
