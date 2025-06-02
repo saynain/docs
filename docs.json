@@ -53,6 +53,28 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "Docs",
+        "groups": [
+          {
+            "group": "Kubernetes",
+            "pages": [
+              "Kubernetes/k3s"
+            ]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/markdown",
+              "essentials/code",
+              "essentials/images",
+              "essentials/settings",
+              "essentials/navigation",
+              "essentials/reusable-snippets"
+            ]
+          }
+        ]
       }
     ],
     "global": {
